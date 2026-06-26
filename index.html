@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tala's World — Sarim</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f1f0ec;
+    --ink:#4a4a45;
+    --green:#9cc9a8;
+    --pink:#e6b8c2;
+    --pink-soft:#f3d6dd;
+    --blue:#a9c6e8;
+    --star-grey:#cfcfc8;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    font-family:'Patrick Hand', sans-serif;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(0,0,0,0.015) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(0,0,0,0.015) 0, transparent 40%);
+    color:var(--ink);
+    overflow:hidden;
+    height:100vh;
+    width:100vw;
+    position:relative;
+  }
+  .title-font{font-family:'Caveat', cursive;}
+
+  /* ---------- stage / sections ---------- */
+  #stage{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+  .page{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(20px);
+    transition:opacity .5s ease, transform .5s ease;
+    padding:40px;
+    text-align:center;
+  }
+  .page.active{
+    opacity:1;
+    pointer-events:auto;
+    transform:translateY(0);
+  }
+
+  /* decorative corner doodles */
+  .doodle{
+    position:absolute;
+    width:60px;
+    height:60px;
+    opacity:.55;
+    z-index:0;
+  }
+  .doodle.tl{top:18px;left:18px;}
+  .doodle.tr{top:18px;right:18px;}
+  .doodle.bl{bottom:18px;left:18px;}
+  .doodle.br{bottom:18px;right:18px;}
+
+  /* ---------- loading ---------- */
+  #loading{
+    font-size:2.2rem;
+    color:var(--green);
+    letter-spacing:1px;
+  }
+
+  /* ---------- welcome / earth ---------- */
+  .welcome-heading{
+    font-size:1.4rem;
+    color:var(--green);
+    margin-bottom:4px;
+  }
+  .welcome-title{
+    font-size:3.2rem;
+    margin:0 0 30px;
+  }
+  #earth-wrap{
+    position:relative;
+    cursor:pointer;
+  }
+  .earth{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 35% 30%, #cfeed6, transparent 45%),
+      linear-gradient(160deg, var(--green) 0 40%, var(--blue) 40% 100%);
+    background-size:220% 220%;
+    box-shadow:inset -10px -10px 25px rgba(0,0,0,0.15);
+    animation:spin 14s linear infinite;
+    transition:transform .25s ease;
+  }
+  #earth-wrap:hover .earth{transform:scale(1.06);}
+  @keyframes spin{
+    0%{background-position:0% 0%;}
+    100%{background-position:200% 0%;}
+  }
+  .click-hint{
+    position:absolute;
+    left:-150px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#8a6fc2;
+    font-size:1.3rem;
+    white-space:nowrap;
+  }
+  .click-hint .arrow{display:inline-block; margin-left:6px;}
+
+  /* ---------- family reveal ---------- */
+  #family-earth-wrap{
+    position:relative;
+    width:520px;
+    max-width:90vw;
+    margin-top:10px;
+  }
+  .big-earth{
+    width:100%;
+    aspect-ratio:2/1;
+    border-radius:520px 520px 0 0 / 260px 260px 0 0;
+    background:
+      radial-gradient(circle at 35% 0%, #cfeed6, transparent 50%),
+      linear-gradient(160deg, var(--green) 0 45%, var(--blue) 45% 100%);
+    margin-top:60px;
+  }
+  .heart-beat{
+    position:absolute;
+    top:-10px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:1.8rem;
+    color:#e89bb0;
+    cursor:pointer;
+    animation:beat 1.1s ease-in-out infinite;
+    z-index:5;
+  }
+  @keyframes beat{
+    0%,100%{transform:translateX(-50%) scale(1);}
+    25%{transform:translateX(-50%) scale(1.25);}
+    40%{transform:translateX(-50%) scale(1);}
+  }
+  .fam-row{
+    position:absolute;
+    top:-46px;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-evenly;
+  }
+  .fam{
+    font-size:2.1rem;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .fam.show{opacity:1; transform:translateY(0);}
+  .fam-label{
+    display:block;
+    font-size:.65rem;
+    font-family:'Patrick Hand',sans-serif;
+    color:var(--ink);
+    margin-top:-4px;
+  }
+  #family-caption{margin-top:18px; font-size:1rem; opacity:.75;}
+
+  /* ---------- profile page ---------- */
+  .profile-name{
+    font-size:2.4rem;
+    letter-spacing:6px;
+    margin-bottom:6px;
+  }
+  .profile-wrap{
+    display:grid;
+    grid-template-columns:200px 220px 200px;
+    grid-template-rows:auto auto;
+    gap:14px 24px;
+    align-items:center;
+    margin-top:10px;
+  }
+  .bio-list{
+    text-align:left;
+    list-style:none;
+    padding:0;
+    margin:0;
+    font-size:1.05rem;
+    line-height:1.5;
+  }
+  .bio-list li::before{content:"• ";}
+  .avatar-circle{
+    font-size:5rem;
+    text-align:center;
+  }
+  .card-btn{
+    background:var(--pink-soft);
+    border:1px solid var(--pink);
+    border-radius:14px;
+    padding:18px 10px;
+    font-family:'Caveat', cursive;
+    font-size:1.25rem;
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .card-btn:hover{transform:translateY(-3px); background:var(--pink);}
+  .card-btn.blank{
+    background:transparent;
+    border:1px dashed #d8c4cb;
+    cursor:default;
+    opacity:.5;
+  }
+  .card-btn.blank:hover{transform:none;}
+
+  /* ---------- generic small page (poster/video placeholders) ---------- */
+  .placeholder-box{
+    width:min(70vw,500px);
+    height:min(40vh,300px);
+    border:2px dashed #c8c2b8;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.1rem;
+    opacity:.7;
+    margin-top:20px;
+  }
+
+  /* ---------- timeline page ---------- */
+  #timeline-page{padding-top:60px;}
+  .timeline-title{font-size:2.4rem; margin-bottom:40px;}
+  .timeline-track{
+    position:relative;
+    width:min(85vw,900px);
+    overflow-x:auto;
+    padding:60px 20px 30px;
+  }
+  .timeline-line{
+    position:relative;
+    height:3px;
+    background:var(--ink);
+    border-radius:2px;
+    min-width:760px;
+  }
+  .timeline-line::before, .timeline-line::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    width:0;height:0;
+    border-style:solid;
+    transform:translateY(-50%);
+  }
+  .timeline-line::before{
+    left:-10px;
+    border-width:6px 10px 6px 0;
+    border-color:transparent var(--ink) transparent transparent;
+  }
+  .timeline-line::after{
+    right:-10px;
+    border-width:6px 0 6px 10px;
+    border-color:transparent transparent transparent var(--ink);
+  }
+  .t-item{
+    position:absolute;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--pink);
+    border:2px solid var(--ink);
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .t-item:hover{transform:translate(-50%,-50%) scale(1.3);}
+  .t-item .t-date{
+    position:absolute;
+    top:-30px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:.8rem;
+    white-space:nowrap;
+    color:var(--ink);
+    font-family:'Caveat',cursive;
+  }
+  .t-item .t-label{
+    position:absolute;
+    top:24px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:.8rem;
+    white-space:nowrap;
+    max-width:120px;
+  }
+
+  /* modal for timeline detail */
+  #t-modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.25);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+  }
+  #t-modal-backdrop.show{display:flex;}
+  #t-modal{
+    background:var(--paper);
+    border:2px solid var(--ink);
+    border-radius:18px;
+    padding:30px 34px;
+    max-width:380px;
+    text-align:center;
+    position:relative;
+  }
+  #t-modal h3{margin:0 0 6px; font-family:'Caveat',cursive; font-size:1.8rem;}
+  #t-modal .t-modal-date{color:#8a6fc2; margin-bottom:10px; display:block;}
+  #t-close{
+    position:absolute; top:8px; right:12px;
+    cursor:pointer; font-size:1.2rem; background:none; border:none; color:var(--ink);
+  }
+
+  /* nav back button */
+  .back-btn{
+    position:absolute;
+    top:20px;
+    left:20px;
+    background:none;
+    border:1px solid var(--ink);
+    border-radius:20px;
+    padding:6px 16px;
+    font-family:'Patrick Hand',sans-serif;
+    cursor:pointer;
+    z-index:10;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+
+  <!-- LOADING -->
+  <section class="page active" id="loading">now loading...</section>
+
+  <!-- WELCOME / EARTH -->
+  <section class="page" id="welcome">
+    <div class="welcome-heading">Welcome To:</div>
+    <h1 class="welcome-title title-font">Tala's World</h1>
+    <div id="earth-wrap">
+      <span class="click-hint">click here <span class="arrow">⟶</span></span>
+      <div class="earth"></div>
+    </div>
+  </section>
+
+  <!-- FAMILY REVEAL -->
+  <section class="page" id="family">
+    <h1 class="welcome-title title-font" style="margin-bottom:0;">Tala's World</h1>
+    <div id="family-earth-wrap">
+      <span class="heart-beat" id="heart-click" title="click me">❤</span>
+      <div class="fam-row" id="fam-row"></div>
+      <div class="big-earth"></div>
+    </div>
+    <div id="family-caption">click the heart to meet Sarim</div>
+  </section>
+
+  <!-- SARIM PROFILE -->
+  <section class="page" id="profile">
+    <button class="back-btn" data-go="family">← back</button>
+    <h1 class="profile-name title-font">S A R I M</h1>
+    <div class="profile-wrap">
+      <div class="card-btn blank">— add a 4th here later —</div>
+      <div></div>
+      <div class="card-btn" data-go="timeline">Our Timeline</div>
+
+      <ul class="bio-list">
+        <li>Tala's universe</li>
+        <li>Always makes Tala laugh</li>
+        <li>Has the biggest heart</li>
+        <li>Super cool &amp; fun</li>
+        <li>Very cuddly</li>
+        <li>Finest man to ever exist :P</li>
+      </ul>
+      <div class="avatar-circle">🧑🏻‍🦱</div>
+      <div></div>
+
+      <div class="card-btn" data-go="poster">A poster for you</div>
+      <div></div>
+      <div class="card-btn" data-go="video">A video for you</div>
+    </div>
+  </section>
+
+  <!-- POSTER PAGE -->
+  <section class="page" id="poster">
+    <button class="back-btn" data-go="profile">← back</button>
+    <h1 class="title-font">A poster for you</h1>
+    <div class="placeholder-box">drop Sarim's poster image here</div>
+  </section>
+
+  <!-- VIDEO PAGE -->
+  <section class="page" id="video">
+    <button class="back-btn" data-go="profile">← back</button>
+    <h1 class="title-font">A video for you</h1>
+    <div class="placeholder-box">embed Sarim's video here</div>
+  </section>
+
+  <!-- TIMELINE PAGE -->
+  <section class="page" id="timeline" id="timeline-page">
+    <button class="back-btn" data-go="profile">← back</button>
+    <h1 class="timeline-title title-font">Our Timeline</h1>
+    <div class="timeline-track">
+      <div class="timeline-line" id="timeline-line"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- timeline detail modal -->
+<div id="t-modal-backdrop">
+  <div id="t-modal">
+    <button id="t-close">✕</button>
+    <span class="t-modal-date" id="t-modal-date"></span>
+    <h3 id="t-modal-title"></h3>
+    <p id="t-modal-desc"></p>
+  </div>
+</div>
+
+<script>
+/* ---------------- EDIT THIS LIST TO ADD MILESTONES ---------------- */
+const milestones = [
+  { date: "Apr 2026", title: "Found out!",      desc: "The day Tala found out Sarim was on the way." },
+  { date: "Jun 2026", title: "First scan",      desc: "Saw his little heartbeat for the first time." },
+  { date: "Aug 2026", title: "Nursery ready",   desc: "Painted the room and put together the crib." },
+  { date: "Due date", title: "Welcome, Sarim!", desc: "The day we finally meet you." }
+];
+/* -------------------------------------------------------------------- */
+
+const familyMembers = ["👧🏻","🧕🏻","👧🏻","🧕🏻","🧑🏻","🧑🏻‍🦱","🧕🏻","👧🏻"];
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id === "family") animateFamily();
+  if(id === "timeline") buildTimeline();
+}
+
+function animateFamily(){
+  const row = document.getElementById("fam-row");
+  row.innerHTML = "";
+  familyMembers.forEach((emoji,i)=>{
+    const d = document.createElement("div");
+    d.className = "fam";
+    d.innerHTML = emoji;
+    row.appendChild(d);
+    setTimeout(()=>d.classList.add("show"), 150*i);
+  });
+}
+
+function buildTimeline(){
+  const line = document.getElementById("timeline-line");
+  line.innerHTML = "";
+  const n = milestones.length;
+  milestones.forEach((m,i)=>{
+    const pct = n === 1 ? 50 : (i/(n-1))*100;
+    const dot = document.createElement("div");
+    dot.className = "t-item";
+    dot.style.left = pct + "%";
+    dot.innerHTML = `<span class="t-date">${m.date}</span><span class="t-label">${m.title}</span>`;
+    dot.addEventListener("click", ()=>openModal(m));
+    line.appendChild(dot);
+  });
+}
+
+function openModal(m){
+  document.getElementById("t-modal-date").textContent = m.date;
+  document.getElementById("t-modal-title").textContent = m.title;
+  document.getElementById("t-modal-desc").textContent = m.desc;
+  document.getElementById("t-modal-backdrop").classList.add("show");
+}
+document.getElementById("t-close").addEventListener("click", ()=>{
+  document.getElementById("t-modal-backdrop").classList.remove("show");
+});
+document.getElementById("t-modal-backdrop").addEventListener("click", (e)=>{
+  if(e.target.id === "t-modal-backdrop") e.target.classList.remove("show");
+});
+
+document.querySelectorAll("[data-go]").forEach(el=>{
+  el.addEventListener("click", ()=> showPage(el.getAttribute("data-go")));
+});
+document.getElementById("earth-wrap").addEventListener("click", ()=> showPage("family"));
+document.getElementById("heart-click").addEventListener("click", ()=> showPage("profile"));
+
+// loading -> welcome
+setTimeout(()=> showPage("welcome"), 1800);
+</script>
+</body>
+</html>
