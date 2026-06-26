@@ -237,6 +237,20 @@
   }
   #t-modal h3{margin:0 0 6px; font-family:'Caveat',cursive; font-size:1.8rem;}
   #t-modal .t-modal-date{color:#8a6fc2; margin-bottom:10px; display:block;}
+  #t-modal-img{
+    width:100%;
+    max-height:220px;
+    object-fit:cover;
+    border-radius:12px;
+    margin-bottom:12px;
+  }
+  #t-modal-link{
+    margin-top:10px;
+    color:#8a6fc2;
+    text-decoration:underline;
+    font-family:'Patrick Hand',sans-serif;
+    cursor:url(assets/cursor.png) 25 25, pointer;
+  }
   #t-close{
     position:absolute; top:8px; right:12px;
     cursor:pointer; font-size:1.2rem; background:none; border:none; color:var(--ink);
@@ -316,18 +330,37 @@
   <div id="t-modal">
     <button id="t-close">✕</button>
     <span class="t-modal-date" id="t-modal-date"></span>
+    <img id="t-modal-img" style="display:none;">
     <h3 id="t-modal-title"></h3>
     <p id="t-modal-desc"></p>
+    <a id="t-modal-link" href="#" target="_blank" rel="noopener" style="display:none;"></a>
   </div>
 </div>
 
 <script>
-/* ---------------- EDIT THIS LIST TO ADD MILESTONES ---------------- */
+/* ---------------- EDIT THIS LIST TO ADD MILESTONES ----------------
+   Each entry can have:
+     date  - shown above the dot
+     title - shown below the dot + as the popup heading
+     desc  - popup body text
+     link  - optional {label, url} shown as a clickable line in the popup
+     img   - optional image path (e.g. "assets/timeline/2026-03-08.jpg")
+             leave as null until you send over the photos — the popup
+             will just skip the image until then.
+----------------------------------------------------------------------- */
 const milestones = [
-  { date: "Apr 2026", title: "Found out!",      desc: "The day Tala found out Sarim was on the way." },
-  { date: "Jun 2026", title: "First scan",      desc: "Saw his little heartbeat for the first time." },
-  { date: "Aug 2026", title: "Nursery ready",   desc: "Painted the room and put together the crib." },
-  { date: "Due date", title: "Welcome, Sarim!", desc: "The day we finally meet you." }
+  { date: "Mar 8, 2026",  title: "First messages",   desc: "First messages exchanged on Instagram.", img: null },
+  { date: "Mar 9, 2026",  title: "First images",      desc: "First images shared.", img: null },
+  { date: "Mar 11, 2026", title: "First Letterboxd review", desc: "Tala's first Letterboxd review.", link: { label: "View the review", url: "https://boxd.it/duhBLV" }, img: null },
+  { date: "Mar 13, 2026", title: "The 7-page essay",  desc: "Tala's 7 page essay.", link: { label: "Read the essay", url: "https://docs.google.com/document/d/10MA9vYKaEgec1ObPrGlD65_ijWtYA7VPu0XGh-rkunM/edit?usp=sharing" }, img: null },
+  { date: "Mar 16, 2026", title: "First activity",    desc: "We watched Train Dreams together via Teleparty.", img: null },
+  { date: "Mar 17, 2026", title: "Discord & our first show", desc: "Added each other on Discord, had our first Discord call, and watched our first show together — When Life Gives You Tangerines.", img: null },
+  { date: "Mar 23, 2026", title: "Exchanged numbers", desc: "We exchanged phone numbers and had our first call, while you were getting melatonin from the pharmacy.", img: null },
+  { date: "Apr 4, 2026",  title: "First FaceTime",    desc: "We FaceTimed for the first time — you were in your car showing me your MMA bag and gloves.", img: null },
+  { date: "Date TBD",     title: "First reel",        desc: "The first reel.", img: null },
+  { date: "Date TBD",     title: "First voice note",  desc: "The first voice note.", img: null },
+  { date: "Jul 19, 2026", title: "Meeting in person!", desc: "We meet each other in person for the first time, inshallah!! I can't wait.", img: null },
+  { date: "Future",       title: "To be determined",  desc: "Inshallah, to many more firsts :)", img: null }
 ];
 /* -------------------------------------------------------------------- */
 
@@ -341,6 +374,7 @@ function buildTimeline(){
   const line = document.getElementById("timeline-line");
   line.innerHTML = "";
   const n = milestones.length;
+  line.style.minWidth = Math.max(600, n * 140) + "px";
   milestones.forEach((m,i)=>{
     const pct = n === 1 ? 50 : 8 + (i/(n-1))*84;
     const dot = document.createElement("div");
@@ -356,6 +390,24 @@ function openModal(m){
   document.getElementById("t-modal-date").textContent = m.date;
   document.getElementById("t-modal-title").textContent = m.title;
   document.getElementById("t-modal-desc").textContent = m.desc;
+
+  const imgEl = document.getElementById("t-modal-img");
+  if (m.img){
+    imgEl.src = m.img;
+    imgEl.style.display = "block";
+  } else {
+    imgEl.style.display = "none";
+  }
+
+  const linkEl = document.getElementById("t-modal-link");
+  if (m.link){
+    linkEl.href = m.link.url;
+    linkEl.textContent = m.link.label + " ↗";
+    linkEl.style.display = "inline-block";
+  } else {
+    linkEl.style.display = "none";
+  }
+
   document.getElementById("t-modal-backdrop").classList.add("show");
 }
 document.getElementById("t-close").addEventListener("click", ()=>{
