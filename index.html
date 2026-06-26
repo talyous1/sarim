@@ -27,6 +27,9 @@
     justify-content:center;
     cursor:url(assets/cursor.png) 25 25, auto;
   }
+  body:active, body *:active{
+    cursor:url(assets/cursor-click.png) 25 25, pointer !important;
+  }
   .title-font{font-family:'Caveat', cursive;}
 
   #canvas{
@@ -106,7 +109,7 @@
   #heart-img{
     position:absolute;
     left:50%;
-    top:36.72%;
+    top:34.85%;
     width:4.2%;
     transform:translate(-50%,-50%);
     cursor:url(assets/cursor.png) 25 25, pointer;
@@ -123,9 +126,9 @@
     position:absolute;
     cursor:url(assets/cursor.png) 25 25, pointer;
   }
-  #hs-timeline{ left:66.48%; top:18.75%; width:28.54%; height:26.53%; }
-  #hs-poster  { left:5.89%;  top:54.58%; width:28.56%; height:26.53%; }
-  #hs-video   { left:66.48%; top:54.58%; width:28.54%; height:26.53%; }
+  #hs-timeline{ left:66.48%; top:14.35%; width:28.54%; height:30.27%; }
+  #hs-poster  { left:5.89%;  top:55.21%; width:28.56%; height:30.28%; }
+  #hs-video   { left:66.48%; top:55.21%; width:28.54%; height:30.28%; }
 
   .sub-page-content{
     position:absolute;
@@ -151,14 +154,16 @@
     background:rgba(255,255,255,.35);
   }
 
-  .timeline-title{font-size:2.4rem; margin-top:14%; margin-bottom:0;}
+  .timeline-title{font-size:2.4rem; margin-top:10%; margin-bottom:0;}
   .timeline-track{
     position:absolute;
     left:6%;
     right:6%;
-    top:48%;
+    top:62%;
+    transform:translateY(-50%);
     overflow-x:auto;
-    padding:60px 10px 30px;
+    overflow-y:hidden;
+    padding:46px 10px 40px;
   }
   .timeline-line{
     position:relative;
@@ -199,22 +204,33 @@
   .t-item:hover{transform:translate(-50%,-50%) scale(1.3);}
   .t-item .t-date{
     position:absolute;
-    top:-30px;
+    top:-34px;
     left:50%;
     transform:translateX(-50%);
-    font-size:.8rem;
+    font-size:1.05rem;
+    font-weight:600;
     white-space:nowrap;
     color:var(--ink);
     font-family:'Caveat',cursive;
   }
   .t-item .t-label{
     position:absolute;
-    top:24px;
+    top:26px;
     left:50%;
     transform:translateX(-50%);
-    font-size:.8rem;
+    font-size:1rem;
     white-space:nowrap;
-    max-width:120px;
+    max-width:160px;
+  }
+  #scroll-hint{
+    position:absolute;
+    left:50%;
+    bottom:8%;
+    transform:translateX(-50%);
+    font-size:.85rem;
+    color:var(--ink);
+    opacity:.55;
+    font-family:'Caveat',cursive;
   }
 
   #t-modal-backdrop{
@@ -286,19 +302,6 @@
     </div>
   </section>
 
-  <section class="page" id="family">
-    <img class="bleed" id="family-img" src="assets/page-3-elements.png" alt="family on the earth">
-    <img id="heart-img" src="assets/page-3-heart.png" alt="click the heart" title="click me">
-  </section>
-
-  <section class="page" id="profile">
-    <button class="back-btn" data-go="family">← back</button>
-    <img class="bleed" src="assets/page-4-elements.png" alt="Sarim's profile">
-    <div class="hotspot" id="hs-timeline" data-go="timeline" title="Our Timeline"></div>
-    <div class="hotspot" id="hs-poster" data-go="poster" title="A poster for you"></div>
-    <div class="hotspot" id="hs-video" data-go="video" title="A video for you"></div>
-  </section>
-
   <section class="page" id="poster">
     <button class="back-btn" data-go="profile">← back</button>
     <div class="sub-page-content">
@@ -321,10 +324,28 @@
     <div class="timeline-track">
       <div class="timeline-line" id="timeline-line"></div>
     </div>
+    <div id="scroll-hint">scroll for more →</div>
   </section>
 
   </div>
+
+  <!-- these two fill the FULL canvas width (not just the letterboxed stage) -->
+  <section class="page" id="family">
+    <img class="bleed" id="family-img" src="assets/page-3-elements.png" alt="family on the earth">
+    <img id="heart-img" src="assets/page-3-heart.png" alt="click the heart" title="click me">
+  </section>
+
+  <section class="page" id="profile">
+    <button class="back-btn" data-go="family">← back</button>
+    <img class="bleed" src="assets/page-4-elements.png" alt="Sarim's profile">
+    <div class="hotspot" id="hs-timeline" data-go="timeline" title="Our Timeline"></div>
+    <div class="hotspot" id="hs-poster" data-go="poster" title="A poster for you"></div>
+    <div class="hotspot" id="hs-video" data-go="video" title="A video for you"></div>
+  </section>
+
 </div>
+
+<audio id="bg-music" src="assets/music.mp3" loop preload="auto"></audio>
 
 <div id="t-modal-backdrop">
   <div id="t-modal">
@@ -374,7 +395,7 @@ function buildTimeline(){
   const line = document.getElementById("timeline-line");
   line.innerHTML = "";
   const n = milestones.length;
-  line.style.minWidth = Math.max(600, n * 140) + "px";
+  line.style.minWidth = Math.max(700, n * 190) + "px";
   milestones.forEach((m,i)=>{
     const pct = n === 1 ? 50 : 8 + (i/(n-1))*84;
     const dot = document.createElement("div");
@@ -420,7 +441,19 @@ document.getElementById("t-modal-backdrop").addEventListener("click", (e)=>{
 document.querySelectorAll("[data-go]").forEach(el=>{
   el.addEventListener("click", ()=> showPage(el.getAttribute("data-go")));
 });
-document.getElementById("earth-wrap").addEventListener("click", ()=> showPage("family"));
+document.getElementById("earth-wrap").addEventListener("click", ()=>{
+  showPage("family");
+  playMusic();
+});
+
+const bgMusic = document.getElementById("bg-music");
+function playMusic(){
+  bgMusic.play().catch(()=>{ /* autoplay blocked until a real user gesture happens */ });
+}
+// try right away (works if the browser allows it / a gesture already happened)
+playMusic();
+// also catch the very first click/tap anywhere on the page as a fallback trigger
+document.body.addEventListener("click", playMusic, { once: true });
 document.getElementById("heart-img").addEventListener("click", ()=> showPage("profile"));
 
 setTimeout(()=> showPage("welcome"), 1800);
