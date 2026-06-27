@@ -233,9 +233,10 @@
     top:26px;
     left:50%;
     transform:translateX(-50%);
-    font-size:1rem;
-    white-space:nowrap;
-    max-width:160px;
+    font-size:.95rem;
+    line-height:1.15;
+    width:130px;
+    text-align:center;
   }
 
   #t-modal-backdrop{
@@ -251,30 +252,56 @@
     background:#f1f0ec;
     border:2px solid var(--ink);
     border-radius:18px;
-    padding:30px 34px;
-    max-width:560px;
+    padding:24px 28px;
+    width:94vw;
+    max-width:1150px;
+    max-height:92vh;
+    overflow-y:auto;
     text-align:center;
     position:relative;
   }
-  #t-modal h3{margin:0 0 6px; font-family:'Caveat',cursive; font-size:1.8rem;}
-  #t-modal .t-modal-date{color:#8a6fc2; margin-bottom:10px; display:block;}
+  #t-modal h3{margin:0 0 4px; font-family:'Caveat',cursive; font-size:1.9rem;}
+  #t-modal .t-modal-date{color:#8a6fc2; margin-bottom:10px; display:block; font-size:1.1rem;}
   #t-modal-gallery{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-    gap:8px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
     margin-bottom:14px;
   }
   #t-modal-gallery:empty{display:none; margin-bottom:0;}
+  /* default (1-2 images): big, up to half width each, tall allowed */
   #t-modal-gallery img{
-    width:100%;
-    height:150px;
-    object-fit:contain;
+    max-width:calc(50% - 8px);
+    max-height:74vh;
+    width:auto;
+    height:auto;
     border-radius:10px;
     border:1px solid #d8d4cb;
     background:#fff;
   }
+  /* a single image gets the full width of the modal */
+  #t-modal-gallery img:only-child{
+    max-width:100%;
+    max-height:76vh;
+  }
+  /* 3+ images: 2 per row, capped height so two rows fit */
+  #t-modal-gallery.many img{
+    max-height:46vh;
+  }
+  #t-modal-audio{
+    width:100%;
+    margin-bottom:14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+  }
+  #t-modal-audio:empty{display:none;}
+  #t-modal-audio audio{ width:min(90%, 520px); }
   #t-modal-link{
-    margin-top:10px;
+    margin-top:6px;
     color:#8a6fc2;
     text-decoration:underline;
     font-family:'Patrick Hand',sans-serif;
@@ -362,6 +389,7 @@
     <button id="t-close">✕</button>
     <span class="t-modal-date" id="t-modal-date"></span>
     <div id="t-modal-gallery"></div>
+    <div id="t-modal-audio"></div>
     <h3 id="t-modal-title"></h3>
     <p id="t-modal-desc"></p>
     <a id="t-modal-link" href="#" target="_blank" rel="noopener" style="display:none;"></a>
@@ -380,15 +408,17 @@
 const milestones = [
   { date: "Mar 8, 2026",  title: "First messages",   desc: "First messages exchanged on Instagram.",
     images: ["assets/timeline/first-messages-1.jpg","assets/timeline/first-messages-2.jpg","assets/timeline/first-messages-3.jpg","assets/timeline/first-messages-4.jpg"] },
-  { date: "Mar 9, 2026",  title: "First images",      desc: "First images shared.", images: [] },
+  { date: "Mar 9, 2026",  title: "First images",      desc: "First images shared.", images: ["assets/timeline/first-image-1.jpg","assets/timeline/first-image-2.jpg"] },
   { date: "Mar 11, 2026", title: "First Letterboxd review", desc: "Tala's first Letterboxd review.", link: { label: "View the review", url: "https://boxd.it/duhBLV" }, images: ["assets/timeline/letterboxd-review.jpg"] },
+  { date: "Mar 11, 2026", title: "Sarim's first reel", desc: "The first reel Sarim shared.", link: { label: "Watch the reel", url: "https://www.instagram.com/reel/DUlLBvAChKW/" } },
   { date: "Mar 13, 2026", title: "The 7-page essay",  desc: "Tala's 7 page essay.", link: { label: "Read the essay", url: "https://docs.google.com/document/d/10MA9vYKaEgec1ObPrGlD65_ijWtYA7VPu0XGh-rkunM/edit?usp=sharing" }, images: ["assets/timeline/essay.jpg"] },
+  { date: "Mar 13, 2026", title: "Sarim's first voice note", desc: "The first voice note Sarim sent.", audio: ["assets/timeline/sarim-first-vn.mp3"] },
+  { date: "Mar 14, 2026", title: "Tala's first voice note", desc: "The first voice note Tala sent.", audio: ["assets/timeline/tala-first-vn.mp3"] },
   { date: "Mar 16, 2026", title: "First activity",    desc: "We watched Train Dreams together via Teleparty.", images: ["assets/timeline/first-activity.jpg"] },
-  { date: "Mar 17, 2026", title: "Discord & our first show", desc: "Added each other on Discord, had our first Discord call, and watched our first show together — When Life Gives You Tangerines.", images: ["assets/timeline/discord-1.jpg","assets/timeline/discord-2.jpg"] },
+  { date: "Mar 17, 2026", title: "Discord & our first show", desc: "Added each other on Discord, had our first Discord call, and watched our first show together — When Life Gives You Tangerines.", images: ["assets/timeline/discord-1.jpg","assets/timeline/discord-2.jpg","assets/timeline/first-show.jpg"] },
+  { date: "Mar 17, 2026", title: "Tala's first reel", desc: "The first reel Tala shared.", link: { label: "Watch the reel", url: "https://www.instagram.com/reel/DSh52xPCPcy/" } },
   { date: "Mar 23, 2026", title: "Exchanged numbers", desc: "We exchanged phone numbers and had our first call, while you were getting melatonin from the pharmacy.", images: ["assets/timeline/exchanged-numbers-1.jpg","assets/timeline/exchanged-numbers-2.jpg","assets/timeline/exchanged-numbers-3.jpg"] },
   { date: "Apr 4, 2026",  title: "First FaceTime",    desc: "We FaceTimed for the first time — you were in your car showing me your MMA bag and gloves.", images: ["assets/timeline/facetime.jpg"] },
-  { date: "Date TBD",     title: "First reel",        desc: "The first reel.", images: [] },
-  { date: "Date TBD",     title: "First voice note",  desc: "The first voice note.", images: [] },
   { date: "Jul 19, 2026", title: "Meeting in person!", desc: "We meet each other in person for the first time, inshallah!! I can't wait.", images: [] },
   { date: "Future",       title: "To be determined",  desc: "Inshallah, to many more firsts :)", images: [] }
 ];
@@ -433,10 +463,21 @@ function openModal(m){
 
   const gallery = document.getElementById("t-modal-gallery");
   gallery.innerHTML = "";
-  (m.images || []).forEach(src => {
+  const imgs = m.images || [];
+  gallery.classList.toggle("many", imgs.length >= 3);
+  imgs.forEach(src => {
     const img = document.createElement("img");
     img.src = src;
     gallery.appendChild(img);
+  });
+
+  const audioWrap = document.getElementById("t-modal-audio");
+  audioWrap.innerHTML = "";
+  (m.audio || []).forEach(src => {
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = src;
+    audioWrap.appendChild(audio);
   });
 
   const linkEl = document.getElementById("t-modal-link");
@@ -448,6 +489,8 @@ function openModal(m){
     linkEl.style.display = "none";
   }
 
+  // scroll modal back to top whenever it opens
+  document.getElementById("t-modal").scrollTop = 0;
   document.getElementById("t-modal-backdrop").classList.add("show");
 }
 document.getElementById("t-close").addEventListener("click", ()=>{
