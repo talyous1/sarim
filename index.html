@@ -173,42 +173,69 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding-top:8%;
+    padding-top:26%;
   }
-  .timeline-title{font-size:2.4rem; margin:0 0 4%;}
-  .timeline-track{
-    width:88%;
+  .timeline-rows{
+    width:78%;
     display:flex;
-    flex-wrap:wrap;
-    align-content:flex-start;
-    justify-content:center;
-    gap:14px;
-    overflow:hidden;
+    flex-direction:column;
+    gap:100px;
+  }
+  .timeline-row{
+    position:relative;
+    height:3px;
+    background:var(--ink);
+    border-radius:2px;
+  }
+  .timeline-row::before, .timeline-row::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    width:0;height:0;
+    border-style:solid;
+    transform:translateY(-50%);
+  }
+  .timeline-row::before{
+    left:-10px;
+    border-width:6px 10px 6px 0;
+    border-color:transparent var(--ink) transparent transparent;
+  }
+  .timeline-row::after{
+    right:-10px;
+    border-width:6px 0 6px 10px;
+    border-color:transparent transparent transparent var(--ink);
   }
   .t-item{
-    position:relative;
-    background:var(--pink-soft);
-    border:1px solid var(--pink);
-    border-radius:14px;
-    padding:10px 18px;
-    text-align:center;
+    position:absolute;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--pink);
+    border:2px solid var(--ink);
     cursor:url(assets/cursor.png) 25 25, pointer;
-    transition:transform .15s ease, background .15s ease;
+    transition:transform .15s ease;
   }
-  .t-item:hover{transform:translateY(-3px); background:var(--pink);}
+  .t-item:hover{transform:translate(-50%,-50%) scale(1.3);}
   .t-item .t-date{
-    display:block;
+    position:absolute;
+    top:-34px;
+    left:50%;
+    transform:translateX(-50%);
     font-size:1.05rem;
     font-weight:600;
     white-space:nowrap;
-    color:#8a6fc2;
+    color:var(--ink);
     font-family:'Caveat',cursive;
   }
   .t-item .t-label{
-    display:block;
-    margin-top:2px;
-    font-size:.95rem;
+    position:absolute;
+    top:26px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:1rem;
     white-space:nowrap;
+    max-width:160px;
   }
 
   #t-modal-backdrop{
@@ -225,32 +252,26 @@
     border:2px solid var(--ink);
     border-radius:18px;
     padding:30px 34px;
-    max-width:460px;
-    max-height:80vh;
-    overflow-y:auto;
+    max-width:560px;
     text-align:center;
     position:relative;
   }
   #t-modal h3{margin:0 0 6px; font-family:'Caveat',cursive; font-size:1.8rem;}
   #t-modal .t-modal-date{color:#8a6fc2; margin-bottom:10px; display:block;}
   #t-modal-gallery{
-    display:flex;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
     gap:8px;
-    overflow-x:auto;
     margin-bottom:14px;
-    scroll-snap-type:x mandatory;
   }
   #t-modal-gallery:empty{display:none; margin-bottom:0;}
   #t-modal-gallery img{
-    max-height:240px;
-    width:auto;
-    max-width:100%;
+    width:100%;
+    height:150px;
+    object-fit:contain;
     border-radius:10px;
     border:1px solid #d8d4cb;
     background:#fff;
-    flex-shrink:0;
-    scroll-snap-align:center;
-    cursor:url(assets/cursor.png) 25 25, pointer;
   }
   #t-modal-link{
     margin-top:10px;
@@ -310,12 +331,6 @@
     </div>
   </section>
 
-  <section class="page" id="timeline">
-    <button class="back-btn" data-go="profile">← back</button>
-    <h1 class="timeline-title title-font">Our Timeline</h1>
-    <div class="timeline-track" id="timeline-track"></div>
-  </section>
-
   </div>
 
   <!-- these two fill the FULL canvas width (not just the letterboxed stage) -->
@@ -330,6 +345,12 @@
     <div class="hotspot" id="hs-timeline" data-go="timeline" title="Our Timeline"></div>
     <div class="hotspot" id="hs-poster" data-go="poster" title="A poster for you"></div>
     <div class="hotspot" id="hs-video" data-go="video" title="A video for you"></div>
+  </section>
+
+  <section class="page" id="timeline">
+    <button class="back-btn" data-go="profile">← back</button>
+    <img class="bleed" src="assets/page-5-elements.png" alt="Our Timeline">
+    <div class="timeline-rows" id="timeline-rows"></div>
   </section>
 
 </div>
@@ -380,14 +401,28 @@ function showPage(id){
 }
 
 function buildTimeline(){
-  const track = document.getElementById("timeline-track");
-  track.innerHTML = "";
-  milestones.forEach(m=>{
-    const card = document.createElement("div");
-    card.className = "t-item";
-    card.innerHTML = `<span class="t-date">${m.date}</span><span class="t-label">${m.title}</span>`;
-    card.addEventListener("click", ()=>openModal(m));
-    track.appendChild(card);
+  const rowsContainer = document.getElementById("timeline-rows");
+  rowsContainer.innerHTML = "";
+
+  const n = milestones.length;
+  const half = Math.ceil(n / 2);
+  const rows = [milestones.slice(0, half), milestones.slice(half)];
+
+  rows.forEach(rowMilestones => {
+    if (rowMilestones.length === 0) return;
+    const row = document.createElement("div");
+    row.className = "timeline-row";
+    const len = rowMilestones.length;
+    rowMilestones.forEach((m,i)=>{
+      const pct = len === 1 ? 50 : 6 + (i/(len-1))*88;
+      const dot = document.createElement("div");
+      dot.className = "t-item";
+      dot.style.left = pct + "%";
+      dot.innerHTML = `<span class="t-date">${m.date}</span><span class="t-label">${m.title}</span>`;
+      dot.addEventListener("click", ()=>openModal(m));
+      row.appendChild(dot);
+    });
+    rowsContainer.appendChild(row);
   });
 }
 
