@@ -29,6 +29,27 @@
   }
   .title-font{font-family:'Caveat', cursive;}
 
+  #mute-btn{
+    position:absolute;
+    top:14px;
+    right:14px;
+    z-index:40;
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    border:1px solid var(--ink);
+    background:rgba(255,255,255,.6);
+    font-size:1.2rem;
+    line-height:1;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    cursor:url(assets/cursor-click.png) 25 25, pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  #mute-btn:hover{ transform:scale(1.08); background:rgba(255,255,255,.85); }
+  #mute-btn.visible{ display:flex; }
+
   /* click cursor shows on hover over anything clickable, as an affordance */
   #earth-wrap:hover,
   #heart-img:hover,
@@ -329,6 +350,7 @@
 <body>
 
 <div id="canvas">
+  <button id="mute-btn" title="Mute / unmute music" aria-label="Mute music">🔊</button>
   <div id="stage">
 
   <section class="page active" id="loading">
@@ -510,6 +532,7 @@ document.getElementById("earth-wrap").addEventListener("click", ()=>{
 
 const bgMusic = document.getElementById("bg-music");
 function playMusic(){
+  if (bgMusic.muted) return; // don't fight the user's mute choice
   bgMusic.play().catch(()=>{ /* autoplay blocked until a real user gesture happens */ });
 }
 // also catch the very first click/tap anywhere on the page as a fallback trigger,
@@ -517,8 +540,18 @@ function playMusic(){
 document.body.addEventListener("click", playMusic, { once: true });
 document.getElementById("heart-img").addEventListener("click", ()=> showPage("profile"));
 
+// mute / unmute toggle (appears after the loading screen)
+const muteBtn = document.getElementById("mute-btn");
+muteBtn.addEventListener("click", (e)=>{
+  e.stopPropagation();
+  bgMusic.muted = !bgMusic.muted;
+  muteBtn.textContent = bgMusic.muted ? "🔇" : "🔊";
+  if (!bgMusic.muted) bgMusic.play().catch(()=>{});
+});
+
 setTimeout(()=>{
   showPage("welcome");
+  muteBtn.classList.add("visible"); // reveal the control once loading is done
   playMusic(); // start music right as the loading screen finishes
 }, 1800);
 
