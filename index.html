@@ -321,6 +321,9 @@
   }
   #t-modal-audio:empty{display:none;}
   #t-modal-audio audio{ width:min(90%, 520px); }
+  #t-modal-video{ margin-bottom:14px; }
+  #t-modal-video:empty{display:none;}
+  #t-modal-video video{ width:100%; max-height:60vh; border-radius:14px; display:block; }
   #t-modal-link{
     margin-top:6px;
     color:#8a6fc2;
@@ -411,6 +414,7 @@
     <button id="t-close">✕</button>
     <span class="t-modal-date" id="t-modal-date"></span>
     <div id="t-modal-gallery"></div>
+    <div id="t-modal-video"></div>
     <div id="t-modal-audio"></div>
     <h3 id="t-modal-title"></h3>
     <p id="t-modal-desc"></p>
@@ -440,6 +444,7 @@ const milestones = [
   { date: "Mar 17, 2026", title: "Discord & our first show", desc: "Added each other on Discord, had our first Discord call, and watched our first show together — When Life Gives You Tangerines.", images: ["assets/timeline/discord-1.jpg","assets/timeline/discord-2.jpg","assets/timeline/first-show.jpg"] },
   { date: "Mar 17, 2026", title: "Tala's first reel", desc: "The first reel Tala shared.", link: { label: "Watch the reel", url: "https://www.instagram.com/reel/DSh52xPCPcy/" } },
   { date: "Mar 23, 2026", title: "Exchanged numbers", desc: "We exchanged phone numbers and had our first call, while you were getting melatonin from the pharmacy.", images: ["assets/timeline/exchanged-numbers-1.jpg","assets/timeline/exchanged-numbers-2.jpg","assets/timeline/exchanged-numbers-3.jpg"] },
+  { date: "Mar 26, 2026", title: "First videos", desc: "We sent each other our first videos of us.", video: ["assets/timeline/first-video.mov"] },
   { date: "Apr 4, 2026",  title: "First FaceTime",    desc: "We FaceTimed for the first time — you were in your car showing me your MMA bag and gloves.", images: ["assets/timeline/facetime.jpg"] },
   { date: "Jul 19, 2026", title: "Meeting in person!", desc: "We meet each other in person for the first time, inshallah!! I can't wait.", images: [] },
   { date: "Future",       title: "To be determined",  desc: "Inshallah, to many more firsts :)", images: [] }
@@ -491,6 +496,15 @@ function openModal(m){
     const img = document.createElement("img");
     img.src = src;
     gallery.appendChild(img);
+  });
+
+  const videoWrap = document.getElementById("t-modal-video");
+  videoWrap.innerHTML = "";
+  (m.video || []).forEach(src => {
+    const video = document.createElement("video");
+    video.controls = true;
+    video.src = src;
+    videoWrap.appendChild(video);
   });
 
   const audioWrap = document.getElementById("t-modal-audio");
