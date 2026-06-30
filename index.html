@@ -331,6 +331,7 @@
   #t-modal-video{ margin-bottom:14px; }
   #t-modal-video:empty{display:none;}
   #t-modal-video video{ width:100%; max-height:60vh; border-radius:14px; display:block; }
+  #t-modal-video iframe{ width:100%; aspect-ratio:9/16; border:none; border-radius:14px; display:block; }
   #t-modal-link{
     margin-top:6px;
     color:#8a6fc2;
@@ -378,7 +379,7 @@
     <button class="back-btn" data-go="profile">← back</button>
     <div class="sub-page-content">
       <h1 class="title-font">A poster for you</h1>
-      <div class="placeholder-box">drop Sarim's poster image here</div>
+      <iframe src="assets/Sarim_Poster.pdf" style="width:100%;height:80vh;border:none;border-radius:16px;"></iframe>
     </div>
   </section>
 
@@ -452,7 +453,7 @@ const milestones = [
   { date: "Mar 17, 2026", title: "Discord & our first show", desc: "Added each other on Discord, had our first Discord call, and watched our first show together — When Life Gives You Tangerines.", images: ["assets/timeline/discord-1.jpg","assets/timeline/discord-2.jpg","assets/timeline/first-show.jpg"] },
   { date: "Mar 17, 2026", title: "Tala's first reel", desc: "The first reel Tala shared.", link: { label: "Watch the reel", url: "https://www.instagram.com/reel/DSh52xPCPcy/" } },
   { date: "Mar 23, 2026", title: "Exchanged numbers", desc: "We exchanged phone numbers and had our first call, while you were getting melatonin from the pharmacy.", images: ["assets/timeline/exchanged-numbers-1.jpg","assets/timeline/exchanged-numbers-2.jpg","assets/timeline/exchanged-numbers-3.jpg"] },
-  { date: "Mar 26, 2026", title: "First videos", desc: "We sent each other our first videos of us.", video: ["assets/timeline/first-video.mov"] },
+  { date: "Mar 26, 2026", title: "First videos", desc: "We sent each other our first videos of us.", driveEmbed: "https://drive.google.com/file/d/1Muly02derlT4_i3clOlN7a-vCjVHG9Wj/preview" },
   { date: "Apr 4, 2026",  title: "First FaceTime",    desc: "We FaceTimed for the first time — you were in your car showing me your MMA bag and gloves.", images: ["assets/timeline/facetime.jpg"] },
   { date: "Jul 19, 2026", title: "Meeting in person!", desc: "We meet each other in person for the first time, inshallah!! I can't wait.", images: [] }
 ];
@@ -507,12 +508,19 @@ function openModal(m){
 
   const videoWrap = document.getElementById("t-modal-video");
   videoWrap.innerHTML = "";
-  (m.video || []).forEach(src => {
-    const video = document.createElement("video");
-    video.controls = true;
-    video.src = src;
-    videoWrap.appendChild(video);
-  });
+  if (m.driveEmbed) {
+    const iframe = document.createElement("iframe");
+    iframe.src = m.driveEmbed;
+    iframe.allow = "autoplay";
+    videoWrap.appendChild(iframe);
+  } else {
+    (m.video || []).forEach(src => {
+      const video = document.createElement("video");
+      video.controls = true;
+      video.src = src;
+      videoWrap.appendChild(video);
+    });
+  }
 
   const audioWrap = document.getElementById("t-modal-audio");
   audioWrap.innerHTML = "";
